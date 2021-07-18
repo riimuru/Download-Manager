@@ -1,5 +1,5 @@
 
-# Download-Manager
+# Download Manager
 Video, Thumbnail, Audio Downloader
 
 ## Screenshots
