@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             YoutubeDL.getInstance().init(getApplication());
             FFmpeg.getInstance().init(getApplication());
+            // starting a new Thread
             Thread thread = new Thread(() -> {
                 try  {
                     // trying to update to the newest version
@@ -110,14 +111,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     e.printStackTrace();
                 }
             });
-
+            
             thread.start();
         } catch (YoutubeDLException e) {
             Toast.makeText(this, String.format("%s: failed to initialize %s", TAG ,e), Toast.LENGTH_SHORT).show();
             Log.e(TAG, "failed to initialize", e);
         }
-
+        // Initializing variables
         initViews();
+        // Initializing the download button
         initListeners();
 
 
@@ -136,8 +138,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
+        // When you click the download button
         if (v.getId() == R.id.DButton) {
             try {
+               
                 startDownload();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -146,36 +150,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     private void startDownload() {
         try {
+            // clear app Cashe
             FileUtils.deleteQuietly(this.getCacheDir());
             deleteCache(this);
 
         } catch (Exception e) {
             Log.e(TAG, "Error");
         }
+        // if the is already download in progress we show this
         if (downloading) {
             Toast.makeText(this, "Cannot Start Download. A download Is Already In progress,", Toast.LENGTH_SHORT).show();
             return;
         }
+        // if the client didnt grant us the storage permission we show this
         if (!isStoragePermissionGranted()) {
             Toast.makeText(this, "Grant Storage Permission And Retry", Toast.LENGTH_LONG).show();
             return;
         }
+        // setup the text input box
         TextInputLayout textInputLayout = findViewById(R.id.textInputLayout);
         Editable Url = Objects.requireNonNull(textInputLayout.getEditText()).getText();
+        // if the user haven't typed anything in the text box we show this
         if (TextUtils.isEmpty(Url.toString())) {
             Toast.makeText(this, "Put Url Please", Toast.LENGTH_SHORT).show();
             return;
         }
+        // show the options on alert dialog
         new AlertDialog.Builder(MainActivity.this)
                 .setTitle("Download Options")
                 .setMessage("Which Type Of The Video You Want To Download?")
                 .setIcon(R.drawable.ytdownload)
                 .setNegativeButton("          Mp4 (video)",
                         (dialog, id) -> {
+                            // make a request
                                 YoutubeDLRequest request = new YoutubeDLRequest(Url.toString());
                                 File youtubeDLDir = getDownloadLocation();
+                            // these options are for mp4 file
                                 request.addOption("-f", "best");
                                 request.addOption("--verbose");
+                            // we save the downloaded file in the download folder
                                 request.addOption("-o",youtubeDLDir.getAbsolutePath() + "/%(title)s.%(ext)s");
 
 
@@ -211,24 +224,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         (dialog, id) -> {
                             YoutubeDLRequest request = new YoutubeDLRequest(Url.toString());
                             File youtubeDLDir = getDownloadLocation();
+                            // these options are for the thumbnail
                             request.addOption("--write-thumbnail");
                             request.addOption("--skip-download");
                             request.addOption("--verbose");
                             request.addOption("-o",youtubeDLDir.getAbsolutePath() + "/%(title)s.%(ext)s");
-
-
+                    
+                            // show some text to the use that the donwload have started.
                             showStart();
-
                             downloading = true;
+                            // start downlaoding
                             Disposable disposable = Observable.fromCallable(() -> YoutubeDL.getInstance().execute(request, callback))
                                     .subscribeOn(Schedulers.newThread())
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe(youtubeDLResponse -> {
+                                        // if the download was successful we show this.
                                         Toast.makeText(MainActivity.this, "The Video Downloaded Successfully!", Toast.LENGTH_LONG).show();
                                         Loading.setVisibility(View.GONE);
                                         DLStatus.setVisibility(View.GONE);
                                         downloading = false;
                                         downloading0 = false;
+                                        // Except any error
                                     }, e -> {
                                         if(BuildConfig.DEBUG) Log.e(TAG,  "Failed To Download", e);
                                         if (downloading0) {
@@ -246,10 +262,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         })
                 .setPositiveButton("          Mp3 (Audio)",
                         (dialog, id) -> {
+                            
                             YoutubeDLRequest request = new YoutubeDLRequest(Url.toString());
                             File youtubeDLDir = getDownloadLocation();
                             //        request.addOption("--write-thumbnail");
                             //        request.addOption("--skip-download");
+                            // mp3 options
                             request.addOption("--extract-audio");
                             request.addOption("--audio-format");
                             request.addOption("mp3");
@@ -289,17 +307,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
+    // create YoutubeDl folder in the Download folder if it doesnt exist
     private File getDownloadLocation() {
         File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File youtubeDLDir = new File(downloadsDir, "YouTubeDL");
         if (!youtubeDLDir.exists()) youtubeDLDir.mkdir();
         return youtubeDLDir;
     }
+    // just some text to show to the client
     private void showStart() {
         Toast.makeText(this, "The Video Started Downloading...", Toast.LENGTH_SHORT).show();
         Loading.setVisibility(View.VISIBLE);
     }
+    // check if the storage permission is granted
     public boolean isStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -312,6 +332,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return true;
         }
     }
+    // delete cace
     public static void deleteCache(Context context) {
         try {
             File dir = context.getCacheDir();
