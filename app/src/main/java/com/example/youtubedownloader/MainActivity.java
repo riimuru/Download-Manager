@@ -69,34 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         FileUtils.deleteQuietly(this.getCacheDir());
         deleteCache(this);
-        System.out.println("PERFECTTTTTTTTTT");
-        // Setting up Variables
-//        com.yausername.ffmpeg.FFmpeg fFmpeg;
-//        try {
-//            ffmpeg.loadBinary(new  LoadBinaryResponseHandler() {
-//                @Override
-//                public void onStart() {
-//                    Log.d(TAG,"ffmpeg load binary started...");
-//                }
-//
-//                @Override
-//                public void onFailure() {
-//                    Log.e(TAG,"ffmpeg load binary failure...");
-//                }
-//
-//                @Override
-//                public void onSuccess() {
-//                    Log.d(TAG,"ffmpeg load binary success...");
-//                }
-//
-//                @Override
-//                public void onFinish() {
-//                    Log.d(TAG,"ffmpeg load binary finish...");
-//                }
-//            });
-//        } catch (FFmpegNotSupportedException e) {
-//            // Handle if FFmpeg is not supported by device
-//        }
+
 
         // initializing YouTubeDL
         try {
