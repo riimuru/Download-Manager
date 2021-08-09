@@ -1,6 +1,6 @@
 
 # Download Manager
-This a simple download manager for Video, Thumbnail, Audio Downloader
+This a simple download manager for Video, Thumbnail, Audio
 
 ## Screenshots
 <img src="https://user-images.githubusercontent.com/57333995/126072702-c52b3682-e87a-4842-bcc3-d588b9c3d4ae.jpeg" width="400" height="700">
